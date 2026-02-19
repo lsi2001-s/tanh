@@ -19,13 +19,7 @@ const translations = {
             title: '제품',
             subtitle: '조명 제품 카탈로그',
             addBtn: '제품 추가',
-            empty: "제품이 없습니다. '제품 추가' 버튼으로 새 제품을 등록하세요.",
-            exportBtn: '백업 내보내기',
-            importBtn: '백업 불러오기',
-            exportSuccess: '제품 백업 파일이 저장되었습니다.',
-            importSuccess: '제품 백업을 불러왔습니다.',
-            importInvalid: '올바른 백업 파일이 아닙니다.',
-            importFail: '백업 불러오기에 실패했습니다.'
+            empty: "제품이 없습니다. '제품 추가' 버튼으로 새 제품을 등록하세요."
         },
         editProject: {
             title: '프로젝트 수정',
@@ -167,13 +161,7 @@ const translations = {
             title: 'Products',
             subtitle: 'Lighting product catalog',
             addBtn: 'Add Product',
-            empty: "No products yet. Add a new product using the 'Add Product' button.",
-            exportBtn: 'Export Backup',
-            importBtn: 'Import Backup',
-            exportSuccess: 'Product backup file has been downloaded.',
-            importSuccess: 'Product backup imported successfully.',
-            importInvalid: 'Invalid backup file.',
-            importFail: 'Failed to import backup.'
+            empty: "No products yet. Add a new product using the 'Add Product' button."
         },
         editProject: {
             title: 'Edit Project',
@@ -628,76 +616,6 @@ function renderCustomProducts() {
     }
 }
 
-function normalizeImportedProduct(item) {
-    if (!item || typeof item !== 'object') return null;
-    const nameKo = typeof item.nameKo === 'string' ? item.nameKo.trim() : '';
-    if (!nameKo) return null;
-    return {
-        id: typeof item.id === 'string' && item.id
-            ? item.id
-            : `product_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
-        nameKo,
-        nameEn: (typeof item.nameEn === 'string' && item.nameEn.trim())
-            ? item.nameEn.trim()
-            : nameKo,
-        descKo: typeof item.descKo === 'string' ? item.descKo : '',
-        descEn: typeof item.descEn === 'string'
-            ? item.descEn
-            : (typeof item.descKo === 'string' ? item.descKo : ''),
-        imageData: (typeof item.imageData === 'string' && item.imageData.startsWith('data:image'))
-            ? item.imageData
-            : null
-    };
-}
-
-function exportProductsBackup() {
-    const lang = document.documentElement.getAttribute('data-lang') || 'ko';
-    const t = translations[lang]?.products || {};
-    const payload = {
-        app: 'TANTANTECH',
-        type: 'products-backup',
-        version: 1,
-        exportedAt: new Date().toISOString(),
-        products: getCustomProducts()
-    };
-    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    const stamp = new Date().toISOString().replace(/[:.]/g, '-');
-    a.href = url;
-    a.download = `tantantech-products-backup-${stamp}.json`;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    URL.revokeObjectURL(url);
-    alert(t.exportSuccess || '제품 백업 파일이 저장되었습니다.');
-}
-
-async function importProductsBackup(file) {
-    const lang = document.documentElement.getAttribute('data-lang') || 'ko';
-    const t = translations[lang]?.products || {};
-    try {
-        const text = await file.text();
-        const parsed = JSON.parse(text);
-        const rawProducts = Array.isArray(parsed)
-            ? parsed
-            : (Array.isArray(parsed?.products) ? parsed.products : null);
-        if (!rawProducts) {
-            alert(t.importInvalid || '올바른 백업 파일이 아닙니다.');
-            return;
-        }
-        const normalized = rawProducts
-            .map(normalizeImportedProduct)
-            .filter(Boolean);
-        saveCustomProducts(normalized);
-        renderCustomProducts();
-        alert(t.importSuccess || '제품 백업을 불러왔습니다.');
-    } catch (err) {
-        console.error('제품 백업 불러오기 실패:', err);
-        alert(t.importFail || '백업 불러오기에 실패했습니다.');
-    }
-}
-
 // ===== Initial render + optional shared sync =====
 function showSharedStorageHintIfNeeded() {
     // localStorage는 브라우저별로 달라서, file:// 로 열면 다른 브라우저에서 제품이 안 보이는 것이 정상입니다.
@@ -1093,9 +1011,6 @@ const productImageInput = document.getElementById('productImageInput');
 const productImageUploadArea = document.getElementById('productImageUploadArea');
 const productUploadPlaceholder = document.getElementById('productUploadPlaceholder');
 const productUploadPreview = document.getElementById('productUploadPreview');
-const exportProductsBtn = document.getElementById('exportProductsBtn');
-const importProductsBtn = document.getElementById('importProductsBtn');
-const importProductsInput = document.getElementById('importProductsInput');
 
 function openAddProductModal() {
     addProductForm?.reset();
@@ -1118,14 +1033,6 @@ addProductBtn?.addEventListener('click', (e) => {
     e.preventDefault();
     e.stopPropagation();
     openAddProductModal();
-});
-exportProductsBtn?.addEventListener('click', exportProductsBackup);
-importProductsBtn?.addEventListener('click', () => importProductsInput?.click());
-importProductsInput?.addEventListener('change', async (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    await importProductsBackup(file);
-    e.target.value = '';
 });
 document.querySelector('.product-modal-close')?.addEventListener('click', closeAddProductModal);
 addProductModal?.querySelector('.modal-overlay')?.addEventListener('click', closeAddProductModal);
