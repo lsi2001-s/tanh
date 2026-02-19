@@ -19,7 +19,9 @@ const translations = {
             title: '제품',
             subtitle: '조명 제품 카탈로그',
             addBtn: '제품 추가',
-            empty: "제품이 없습니다. '제품 추가' 버튼으로 새 제품을 등록하세요."
+            empty: "제품이 없습니다. '제품 추가' 버튼으로 새 제품을 등록하세요.",
+            noCategory: '이 카테고리에 제품이 없습니다.',
+            filterAll: '전체'
         },
         editProject: {
             title: '프로젝트 수정',
@@ -49,10 +51,16 @@ const translations = {
             imageHint: '클릭하여 제품 이미지 업로드 (최대 10MB)',
             nameKo: '제품명 (한글)',
             nameEn: '제품명 (영어)',
+            category: '카테고리',
             descKo: '설명 (한글)',
             descEn: '설명 (영어)',
             cancel: '취소',
             submit: '추가하기'
+        },
+        productCategory: {
+            landscape: '경관조명',
+            floodlight: '투광기조명',
+            solar: '태양광조명'
         },
         filter: {
             all: '전체',
@@ -161,7 +169,9 @@ const translations = {
             title: 'Products',
             subtitle: 'Lighting product catalog',
             addBtn: 'Add Product',
-            empty: "No products yet. Add a new product using the 'Add Product' button."
+            empty: "No products yet. Add a new product using the 'Add Product' button.",
+            noCategory: 'No products in this category.',
+            filterAll: 'All'
         },
         editProject: {
             title: 'Edit Project',
@@ -191,10 +201,16 @@ const translations = {
             imageHint: 'Click to upload product image (Max 10MB)',
             nameKo: 'Product Name (Korean)',
             nameEn: 'Product Name (English)',
+            category: 'Category',
             descKo: 'Description (Korean)',
             descEn: 'Description (English)',
             cancel: 'Cancel',
             submit: 'Add'
+        },
+        productCategory: {
+            landscape: 'Landscape Lighting',
+            floodlight: 'Floodlight',
+            solar: 'Solar Lighting'
         },
         filter: {
             all: 'All',
@@ -290,6 +306,7 @@ const translations = {
 const navbar = document.querySelector('.navbar');
 const themeToggle = document.querySelector('.theme-toggle');
 const filterBtns = document.querySelectorAll('.filter-btn');
+const productFilterBtns = document.querySelectorAll('.product-filter-btn');
 const modal = document.getElementById('projectModal');
 const modalClose = document.querySelector('.modal-close');
 const modalOverlay = document.querySelector('.modal-overlay');
@@ -574,6 +591,12 @@ function saveCustomProducts(products) {
     pushArrayToServer('/api/products', products);
 }
 
+function getProductCategoryLabel(category, lang) {
+    return translations[lang]?.productCategory?.[category]
+        || translations.ko.productCategory?.[category]
+        || category;
+}
+
 function renderCustomProducts() {
     const gallery = document.querySelector('.products-gallery');
     const emptyMsg = gallery?.querySelector('.products-empty-msg');
@@ -586,9 +609,12 @@ function renderCustomProducts() {
     products.forEach(product => {
         const name = lang === 'ko' ? product.nameKo : product.nameEn;
         const desc = lang === 'ko' ? product.descKo : product.descEn;
+        const category = product.category || 'landscape';
+        const categoryLabel = getProductCategoryLabel(category, lang);
         const article = document.createElement('article');
         article.className = 'product-item';
         article.dataset.productId = product.id;
+        article.dataset.productCategory = category;
 
         const imgContent = product.imageData
             ? `<img src="${product.imageData}" alt="${escapeHtml(name || product.nameKo)}" class="product-img">`
@@ -599,6 +625,7 @@ function renderCustomProducts() {
             <div class="product-card">
                 <div class="product-image">${imgContent}</div>
                 <div class="product-info">
+                    <p class="product-category">${escapeHtml(categoryLabel)}</p>
                     <h3>${escapeHtml(name || product.nameKo)}</h3>
                     ${desc ? `<p>${escapeHtml(desc)}</p>` : ''}
                     <div class="product-actions">
@@ -613,6 +640,44 @@ function renderCustomProducts() {
 
     if (emptyMsg) {
         emptyMsg.style.display = products.length > 0 ? 'none' : 'block';
+    }
+
+    const activeFilter = document.querySelector('.product-filter-btn.active')?.dataset?.productFilter || 'all';
+    filterProducts(activeFilter);
+}
+
+function filterProducts(filter) {
+    const items = document.querySelectorAll('.product-item');
+    const emptyMsg = document.querySelector('.products-empty-msg');
+    const lang = document.documentElement.getAttribute('data-lang') || 'ko';
+    let visibleCount = 0;
+
+    items.forEach(item => {
+        const category = item.dataset.productCategory || 'landscape';
+        const isMatch = filter === 'all' || category === filter;
+        if (isMatch) {
+            item.classList.remove('hidden');
+            visibleCount++;
+        } else {
+            item.classList.add('hidden');
+        }
+    });
+
+    if (emptyMsg) {
+        const hasProducts = items.length > 0;
+        if (!hasProducts) {
+            emptyMsg.style.display = 'block';
+            emptyMsg.textContent = translations[lang]?.products?.empty
+                || (lang === 'ko'
+                    ? "제품이 없습니다. '제품 추가' 버튼으로 새 제품을 등록하세요."
+                    : "No products yet. Add a new product using the 'Add Product' button.");
+        } else if (visibleCount === 0) {
+            emptyMsg.style.display = 'block';
+            emptyMsg.textContent = translations[lang]?.products?.noCategory
+                || (lang === 'ko' ? '이 카테고리에 제품이 없습니다.' : 'No products in this category.');
+        } else {
+            emptyMsg.style.display = 'none';
+        }
     }
 }
 
@@ -1082,6 +1147,7 @@ addProductForm?.addEventListener('submit', async (e) => {
     e.preventDefault();
     const nameKo = document.getElementById('productNameKo')?.value?.trim();
     const nameEn = document.getElementById('productNameEn')?.value?.trim();
+    const category = document.getElementById('productCategory')?.value || 'landscape';
     const descKo = document.getElementById('productDescKo')?.value?.trim();
     const descEn = document.getElementById('productDescEn')?.value?.trim();
 
@@ -1100,6 +1166,7 @@ addProductForm?.addEventListener('submit', async (e) => {
         id: 'product_' + Date.now(),
         nameKo,
         nameEn: nameEn || nameKo,
+        category,
         descKo: descKo || '',
         descEn: descEn || descKo || '',
         imageData
@@ -1144,6 +1211,7 @@ function openEditProductModal(productId) {
     document.getElementById('editProductId').value = productId;
     document.getElementById('editProductNameKo').value = product.nameKo || '';
     document.getElementById('editProductNameEn').value = product.nameEn || '';
+    document.getElementById('editProductCategory').value = product.category || 'landscape';
     document.getElementById('editProductDescKo').value = product.descKo || '';
     document.getElementById('editProductDescEn').value = product.descEn || '';
 
@@ -1219,6 +1287,7 @@ editProductForm?.addEventListener('submit', async (e) => {
     const productId = document.getElementById('editProductId')?.value;
     const nameKo = document.getElementById('editProductNameKo')?.value?.trim();
     const nameEn = document.getElementById('editProductNameEn')?.value?.trim();
+    const category = document.getElementById('editProductCategory')?.value || 'landscape';
     const descKo = document.getElementById('editProductDescKo')?.value?.trim();
     const descEn = document.getElementById('editProductDescEn')?.value?.trim();
 
@@ -1240,6 +1309,7 @@ editProductForm?.addEventListener('submit', async (e) => {
         ...products[idx],
         nameKo,
         nameEn: nameEn || nameKo,
+        category,
         descKo: descKo || '',
         descEn: descEn || descKo || '',
         imageData
@@ -1305,6 +1375,14 @@ filterBtns.forEach(btn => {
         filterBtns.forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         filterGallery(btn.dataset.filter);
+    });
+});
+
+productFilterBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+        productFilterBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        filterProducts(btn.dataset.productFilter);
     });
 });
 

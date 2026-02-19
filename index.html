@@ -94,6 +94,14 @@
         <div class="container">
             <h2 class="section-title" data-i18n="products.title">제품</h2>
             <p class="section-desc" data-i18n="products.subtitle">조명 제품 카탈로그</p>
+            <div class="products-filter-row">
+                <div class="products-filter-btns">
+                    <button class="product-filter-btn active" data-product-filter="all" data-i18n="products.filterAll">전체</button>
+                    <button class="product-filter-btn" data-product-filter="landscape" data-i18n="productCategory.landscape">경관조명</button>
+                    <button class="product-filter-btn" data-product-filter="floodlight" data-i18n="productCategory.floodlight">투광기조명</button>
+                    <button class="product-filter-btn" data-product-filter="solar" data-i18n="productCategory.solar">태양광조명</button>
+                </div>
+            </div>
             <div class="products-add-row">
                 <button type="button" class="add-product-btn" id="addProductBtn">
                     <span class="add-icon">+</span> <span data-i18n="products.addBtn">제품 추가</span>
@@ -407,6 +415,14 @@
                     <input type="text" id="productNameEn" placeholder="e.g. LED Landscape Light 50W">
                 </div>
                 <div class="form-group">
+                    <label data-i18n="addProduct.category">카테고리</label>
+                    <select id="productCategory" required>
+                        <option value="landscape" data-i18n="productCategory.landscape">경관조명</option>
+                        <option value="floodlight" data-i18n="productCategory.floodlight">투광기조명</option>
+                        <option value="solar" data-i18n="productCategory.solar">태양광조명</option>
+                    </select>
+                </div>
+                <div class="form-group">
                     <label data-i18n="addProduct.descKo">설명 (한글)</label>
                     <textarea id="productDescKo" rows="3" placeholder="제품에 대한 설명을 입력하세요"></textarea>
                 </div>
@@ -448,6 +464,14 @@
                 <div class="form-group">
                     <label data-i18n="addProduct.nameEn">제품명 (영어)</label>
                     <input type="text" id="editProductNameEn" placeholder="e.g. LED Landscape Light 50W">
+                </div>
+                <div class="form-group">
+                    <label data-i18n="addProduct.category">카테고리</label>
+                    <select id="editProductCategory" required>
+                        <option value="landscape" data-i18n="productCategory.landscape">경관조명</option>
+                        <option value="floodlight" data-i18n="productCategory.floodlight">투광기조명</option>
+                        <option value="solar" data-i18n="productCategory.solar">태양광조명</option>
+                    </select>
                 </div>
                 <div class="form-group">
                     <label data-i18n="addProduct.descKo">설명 (한글)</label>
