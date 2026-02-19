@@ -132,6 +132,14 @@ const translations = {
             descEn: '설명 (영어)',
             cancel: '취소',
             submit: '추가하기'
+        },
+        admin: {
+            title: '데이터 관리',
+            desc: '다른 기기로 데이터를 이동하려면 데이터를 내보내어 파일로 저장하고, 새 기기에서 가져오기를 하세요.',
+            export: '데이터 내보내기 (다운로드)',
+            import: '데이터 가져오기 (파일 선택)',
+            successExport: '데이터가 저장되었습니다.',
+            successImport: '데이터가 성공적으로 복원되었습니다.'
         }
     },
     en: {
@@ -266,6 +274,14 @@ const translations = {
             descEn: 'Description (English)',
             cancel: 'Cancel',
             submit: 'Add'
+        },
+        admin: {
+            title: 'Data Management',
+            desc: 'To move data to another device, export data to a file and import it on the new device.',
+            export: 'Export Data (Download)',
+            import: 'Import Data (Select File)',
+            successExport: 'Data saved.',
+            successImport: 'Data restored successfully.'
         }
     }
 };
@@ -1509,3 +1525,125 @@ style.textContent = `
     }
 `;
 document.head.appendChild(style);
+
+// ===== Admin / Data Management =====
+const adminBtn = document.getElementById('adminBtn');
+const adminModal = document.getElementById('adminModal');
+const adminPasswordInput = document.getElementById('adminPasswordInput');
+const adminErrorMsg = document.getElementById('adminErrorMsg');
+const adminActions = document.getElementById('adminActions');
+const adminLoginActions = document.getElementById('adminLoginActions');
+const confirmAdmin = document.getElementById('confirmAdmin');
+const cancelAdmin = document.getElementById('cancelAdmin');
+const exportDataBtn = document.getElementById('exportDataBtn');
+const importFileInput = document.getElementById('importFileInput');
+
+function openAdminModal() {
+    adminPasswordInput.value = '';
+    adminErrorMsg.textContent = '';
+    adminActions.style.display = 'none';
+    adminLoginActions.style.display = 'flex';
+    adminPasswordInput.parentElement.style.display = 'block';
+    
+    adminModal?.classList.add('active');
+    document.body.style.overflow = 'hidden';
+    setTimeout(() => adminPasswordInput?.focus(), 100);
+}
+
+function closeAdminModal() {
+    adminModal?.classList.remove('active');
+    document.body.style.overflow = '';
+}
+
+function checkAdminPassword() {
+    const input = adminPasswordInput?.value?.trim();
+    const lang = document.documentElement.getAttribute('data-lang') || 'ko';
+    
+    if (input === '8253') {
+        // Password correct
+        adminLoginActions.style.display = 'none';
+        adminPasswordInput.parentElement.style.display = 'none';
+        adminActions.style.display = 'flex';
+        adminActions.style.flexDirection = 'column';
+        adminActions.style.gap = '10px';
+    } else {
+        adminErrorMsg.textContent = lang === 'ko' ? '비밀번호가 일치하지 않습니다.' : 'Incorrect password.';
+    }
+}
+
+function exportData() {
+    const data = {
+        projects: getCustomProjects(),
+        products: getCustomProducts(),
+        timestamp: new Date().toISOString(),
+        version: '1.0'
+    };
+    
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `tantantech_backup_${new Date().toISOString().slice(0,10)}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    
+    const lang = document.documentElement.getAttribute('data-lang') || 'ko';
+    alert(translations[lang].admin.successExport || '데이터가 저장되었습니다.');
+}
+
+function importData(file) {
+    if (!file) return;
+    
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        try {
+            const data = JSON.parse(e.target.result);
+            if (data.projects && Array.isArray(data.projects)) {
+                saveCustomProjects(data.projects);
+            }
+            if (data.products && Array.isArray(data.products)) {
+                saveCustomProducts(data.products);
+            }
+            
+            const lang = document.documentElement.getAttribute('data-lang') || 'ko';
+            alert(translations[lang].admin.successImport || '데이터가 복원되었습니다.');
+            location.reload();
+        } catch (err) {
+            console.error(err);
+            const lang = document.documentElement.getAttribute('data-lang') || 'ko';
+            alert(lang === 'ko' ? '파일 형식이 올바르지 않습니다.' : 'Invalid file format.');
+        }
+    };
+    reader.readAsText(file);
+}
+
+adminBtn?.addEventListener('click', (e) => {
+    e.preventDefault();
+    openAdminModal();
+});
+
+document.querySelector('.admin-modal-close')?.addEventListener('click', closeAdminModal);
+adminModal?.querySelector('.modal-overlay')?.addEventListener('click', closeAdminModal);
+cancelAdmin?.addEventListener('click', closeAdminModal);
+
+confirmAdmin?.addEventListener('click', checkAdminPassword);
+adminPasswordInput?.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+        e.preventDefault();
+        checkAdminPassword();
+    }
+});
+
+exportDataBtn?.addEventListener('click', exportData);
+
+importFileInput?.addEventListener('change', (e) => {
+    const file = e.target.files?.[0];
+    if (file) {
+        if (confirm('현재 데이터가 덮어씌워집니다. 진행하시겠습니까?')) {
+            importData(file);
+        }
+        e.target.value = ''; // Reset input
+    }
+});
