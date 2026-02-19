@@ -308,12 +308,12 @@ const themeToggle = document.querySelector('.theme-toggle');
 const filterBtns = document.querySelectorAll('.filter-btn');
 const productFilterBtns = document.querySelectorAll('.product-filter-btn');
 const modal = document.getElementById('projectModal');
-const modalClose = document.querySelector('.modal-close');
-const modalOverlay = document.querySelector('.modal-overlay');
-const modalTitle = document.querySelector('.modal-title');
-const modalCategory = document.querySelector('.modal-category');
-const modalDesc = document.querySelector('.modal-desc');
-const modalImage = document.querySelector('.modal-image .placeholder-img');
+const modalClose = modal?.querySelector('.modal-close');
+const modalOverlay = modal?.querySelector('.modal-overlay');
+const modalTitle = document.querySelector('#projectModal .modal-title');
+const modalCategory = document.querySelector('#projectModal .modal-category');
+const modalDesc = document.querySelector('#projectModal .modal-desc');
+const modalImage = document.querySelector('#projectModal .modal-image .placeholder-img');
 const contactForm = document.querySelector('.contact-form');
 const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
 const navLinks = document.querySelector('.nav-links');
@@ -1254,7 +1254,7 @@ function openModal(title, category, desc, imageUrl = null) {
     modalCategory.textContent = categoryNames[category]?.[lang] || category;
     modalDesc.textContent = desc;
     
-    const modalImageContainer = document.querySelector('.modal-image');
+    const modalImageContainer = modal?.querySelector('.modal-image');
     const placeholderEl = modalImageContainer?.querySelector('.placeholder-img');
     const existingImg = modalImageContainer?.querySelector('img.preview-img');
     if (imageUrl) {
