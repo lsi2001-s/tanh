@@ -145,7 +145,7 @@
             </div>
 
             <div class="about-section">
-                <h3 class="about-section-title" data-i18n="about.diffTitle">■ 탄탄테크 만의 차별점</h3>
+                <h3 class="about-section-title" data-i18n="about.diffTitle">■ 탄탄테크만의 차별점</h3>
                 <p class="about-diff" data-i18n="about.diffText">'원스톱 토털 서비스' - 기획 및 설계부터 생산, 설치 및 지원, 그리고 철저한 사후관리(A/S)까지 모든 과정을 '탄탄'하게 책임집니다. 고객이 믿고 맡길 수 있는 정직한 공정을 약속합니다.</p>
             </div>
 
@@ -205,7 +205,7 @@
                     <a href="#" aria-label="링크드인">LinkedIn</a>
                     <a href="#" aria-label="포트폴리오">Behance</a>
                 </div>
-                <button id="adminBtn" class="admin-btn" style="margin-left: 1rem; opacity: 0.5; font-size: 0.8rem; background: none; border: 1px solid currentColor; padding: 2px 8px; border-radius: 4px; cursor: pointer;">Admin</button>
+                <button id="adminBtn" class="admin-btn" data-i18n="admin.btn">Admin</button>
             </div>
         </div>
     </footer>
@@ -216,33 +216,33 @@
         <div class="modal-content modal-delete">
             <button class="modal-close admin-modal-close" aria-label="닫기">&times;</button>
             <h3 class="modal-delete-title" data-i18n="admin.title">데이터 관리</h3>
-            <p class="modal-delete-msg" data-i18n="admin.desc" style="font-size: 0.9rem; opacity: 0.8; margin-bottom: 20px;">
+            <p class="modal-delete-msg" data-i18n="admin.desc">
                 다른 기기로 데이터를 이동하려면 '데이터 내보내기' 후 파일을 저장하고, 
                 새 기기에서 '데이터 가져오기'를 하세요.
             </p>
             
             <div class="form-group">
-                <label data-i18n="delete.passwordLabel">관리자 비밀번호</label>
-                <input type="password" id="adminPasswordInput" placeholder="비밀번호 입력" autocomplete="off">
+                <label data-i18n="admin.passwordLabel">관리자 비밀번호</label>
+                <input type="password" id="adminPasswordInput" data-i18n-placeholder="delete.passwordPlaceholder" placeholder="비밀번호 입력" autocomplete="off">
                 <p class="delete-error-msg" id="adminErrorMsg"></p>
             </div>
 
-            <div class="admin-actions" id="adminActions" style="display: none; flex-direction: column; gap: 10px; width: 100%;">
+            <div class="admin-actions" id="adminActions">
                 <button type="button" class="submit-add-btn" id="exportDataBtn" style="width: 100%;">
                     <span data-i18n="admin.export">데이터 내보내기 (다운로드)</span>
                 </button>
                 
-                <div style="position: relative; width: 100%;">
+                <div class="admin-import-wrapper">
                     <button type="button" class="cancel-btn" id="importDataBtn" style="width: 100%; text-align: center;">
                         <span data-i18n="admin.import">데이터 가져오기 (복원)</span>
                     </button>
-                    <input type="file" id="importFileInput" accept=".json" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer;">
+                    <input type="file" id="importFileInput" accept=".json" class="admin-import-input">
                 </div>
             </div>
 
             <div class="form-actions" id="adminLoginActions">
-                <button type="button" class="cancel-btn" id="cancelAdmin">취소</button>
-                <button type="button" class="delete-confirm-btn" id="confirmAdmin">확인</button>
+                <button type="button" class="cancel-btn" id="cancelAdmin" data-i18n="delete.cancel">취소</button>
+                <button type="button" class="delete-confirm-btn" id="confirmAdmin" data-i18n="editProject.passwordConfirm">확인</button>
             </div>
         </div>
     </div>

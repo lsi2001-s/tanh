@@ -142,8 +142,10 @@ const translations = {
             submit: '추가하기'
         },
         admin: {
+            btn: 'Admin',
             title: '데이터 관리',
             desc: '다른 기기로 데이터를 이동하려면 데이터를 내보내어 파일로 저장하고, 새 기기에서 가져오기를 하세요.',
+            passwordLabel: '관리자 비밀번호',
             export: '데이터 내보내기 (다운로드)',
             import: '데이터 가져오기 (파일 선택)',
             successExport: '데이터가 저장되었습니다.',
@@ -292,10 +294,12 @@ const translations = {
             submit: 'Add'
         },
         admin: {
+            btn: 'Admin',
             title: 'Data Management',
             desc: 'To move data to another device, export data to a file and import it on the new device.',
+            passwordLabel: 'Admin Password',
             export: 'Export Data (Download)',
-            import: 'Import Data (Select File)',
+            import: 'Import Data (Restore)',
             successExport: 'Data saved.',
             successImport: 'Data restored successfully.'
         }
@@ -1580,7 +1584,7 @@ function openAdminModal() {
     adminErrorMsg.textContent = '';
     adminActions.style.display = 'none';
     adminLoginActions.style.display = 'flex';
-    adminPasswordInput.parentElement.style.display = 'block';
+    adminPasswordInput.closest('.form-group').style.display = 'block';
     
     adminModal?.classList.add('active');
     document.body.style.overflow = 'hidden';
@@ -1599,10 +1603,8 @@ function checkAdminPassword() {
     if (input === '8253') {
         // Password correct
         adminLoginActions.style.display = 'none';
-        adminPasswordInput.parentElement.style.display = 'none';
+        adminPasswordInput.closest('.form-group').style.display = 'none';
         adminActions.style.display = 'flex';
-        adminActions.style.flexDirection = 'column';
-        adminActions.style.gap = '10px';
     } else {
         adminErrorMsg.textContent = lang === 'ko' ? '비밀번호가 일치하지 않습니다.' : 'Incorrect password.';
     }
