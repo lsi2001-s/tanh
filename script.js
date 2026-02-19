@@ -142,10 +142,8 @@ const translations = {
             submit: '추가하기'
         },
         admin: {
-            btn: 'Admin',
             title: '데이터 관리',
             desc: '다른 기기로 데이터를 이동하려면 데이터를 내보내어 파일로 저장하고, 새 기기에서 가져오기를 하세요.',
-            passwordLabel: '관리자 비밀번호',
             export: '데이터 내보내기 (다운로드)',
             import: '데이터 가져오기 (파일 선택)',
             successExport: '데이터가 저장되었습니다.',
@@ -294,12 +292,10 @@ const translations = {
             submit: 'Add'
         },
         admin: {
-            btn: 'Admin',
             title: 'Data Management',
             desc: 'To move data to another device, export data to a file and import it on the new device.',
-            passwordLabel: 'Admin Password',
             export: 'Export Data (Download)',
-            import: 'Import Data (Restore)',
+            import: 'Import Data (Select File)',
             successExport: 'Data saved.',
             successImport: 'Data restored successfully.'
         }
@@ -366,6 +362,8 @@ function renderCustomProjects() {
     const t = translations[lang];
     const customProjects = getCustomProjects();
 
+    const activeFilter = document.querySelector('.filter-btn.active')?.dataset?.filter || 'all';
+
     customProjects.forEach(project => {
         const title = lang === 'ko' ? project.titleKo : project.titleEn;
         const subtitle = lang === 'ko' ? project.subtitleKo : project.subtitleEn;
@@ -375,6 +373,11 @@ function renderCustomProjects() {
         article.className = `gallery-item ${project.category}`;
         article.dataset.category = project.category;
         article.dataset.customId = project.id;
+
+        // 필터 상태에 따라 초기 가시성 설정
+        if (activeFilter !== 'all' && project.category !== activeFilter) {
+            article.classList.add('hidden');
+        }
 
         const safeTitle = escapeHtml(title || project.titleKo);
         const imgContent = project.imageData
@@ -411,8 +414,7 @@ function renderCustomProjects() {
             animationObserver.observe(item);
     });
 
-    // 현재 선택된 필터 다시 적용
-    const activeFilter = document.querySelector('.filter-btn.active')?.dataset?.filter || 'all';
+    // 현재 선택된 필터에 따른 빈 메시지 업데이트
     filterGallery(activeFilter);
 }
 
@@ -526,6 +528,12 @@ function renderCustomProducts() {
         article.className = 'product-item';
         article.dataset.productId = product.id;
         article.dataset.productCategory = category;
+
+        // 필터 상태에 따라 초기 가시성 설정
+        const activeFilter = document.querySelector('.product-filter-btn.active')?.dataset?.productFilter || 'all';
+        if (activeFilter !== 'all' && category !== activeFilter) {
+            article.classList.add('hidden');
+        }
 
         const imgContent = product.imageData
             ? `<img src="${product.imageData}" alt="${escapeHtml(name || product.nameKo)}" class="product-img">`
@@ -1309,6 +1317,10 @@ function openDeleteModal(id, type = 'project') {
     const confirmBtn = document.getElementById('confirmDelete');
     const passwordLabel = document.getElementById('deleteModalPasswordLabel');
 
+    // 모달 내용 초기화
+    deleteModalTitle.textContent = '';
+    deleteModalMessage.textContent = '';
+
     if (type === 'editProject') {
         deleteModalTitle.textContent = ept.passwordTitle || '프로젝트 수정';
         deleteModalMessage.textContent = ept.passwordMessage || '수정하려면 비밀번호를 입력하세요.';
@@ -1584,7 +1596,7 @@ function openAdminModal() {
     adminErrorMsg.textContent = '';
     adminActions.style.display = 'none';
     adminLoginActions.style.display = 'flex';
-    adminPasswordInput.closest('.form-group').style.display = 'block';
+    adminPasswordInput.parentElement.style.display = 'block';
     
     adminModal?.classList.add('active');
     document.body.style.overflow = 'hidden';
@@ -1603,8 +1615,10 @@ function checkAdminPassword() {
     if (input === '8253') {
         // Password correct
         adminLoginActions.style.display = 'none';
-        adminPasswordInput.closest('.form-group').style.display = 'none';
+        adminPasswordInput.parentElement.style.display = 'none';
         adminActions.style.display = 'flex';
+        adminActions.style.flexDirection = 'column';
+        adminActions.style.gap = '10px';
     } else {
         adminErrorMsg.textContent = lang === 'ko' ? '비밀번호가 일치하지 않습니다.' : 'Incorrect password.';
     }
