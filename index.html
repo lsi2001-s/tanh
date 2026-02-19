@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="ko" data-lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TANTANTECH | 조명 디자인 포트폴리오</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- 네비게이션 -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="#" class="logo-link">
+                <img src="logo.png" alt="TANTANTECH" class="logo-img" onerror="this.style.display='none'">
+                <span class="logo-text">TANTANTECH</span>
+            </a>
+            <ul class="nav-links">
+                <li><a href="#works" data-i18n="nav.works">포트폴리오</a></li>
+                <li><a href="#products" data-i18n="nav.products">제품</a></li>
+                <li><a href="#about" data-i18n="nav.about">회사소개</a></li>
+                <li><a href="#contact" data-i18n="nav.contact">연락처</a></li>
+            </ul>
+            <div class="nav-actions">
+                <div class="lang-toggle">
+                    <button class="lang-btn active" data-lang="ko">한글</button>
+                    <span class="lang-divider">|</span>
+                    <button class="lang-btn" data-lang="en">EN</button>
+                </div>
+                <button class="theme-toggle" aria-label="테마 전환">
+                <span class="sun-icon">☀️</span>
+                <span class="moon-icon">🌙</span>
+            </button>
+            </div>
+            <button class="mobile-menu-btn" aria-label="메뉴">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- 히어로 섹션 -->
+    <header class="hero">
+        <div class="hero-bg">
+            <div class="light-beam light-1"></div>
+            <div class="light-beam light-2"></div>
+            <div class="light-beam light-3"></div>
+        </div>
+        <div class="hero-content">
+            <p class="hero-subtitle" data-i18n="hero.subtitle">Lighting Design Studio</p>
+            <h1 class="hero-title">
+                <span class="title-line" data-i18n="hero.title1">빛으로</span>
+                <span class="title-line" data-i18n="hero.title2">공간을</span>
+                <span class="title-line" data-i18n="hero.title3">그리다</span>
+            </h1>
+            <p class="hero-desc" data-i18n="hero.desc">공간과 감성에 어울리는 조명 디자인으로 삶의 질을 높입니다.</p>
+            <a href="#works" class="hero-cta" data-i18n="hero.cta">포트폴리오 보기</a>
+        </div>
+        <div class="scroll-indicator">
+            <span></span>
+        </div>
+    </header>
+
+    <!-- 작업물 갤러리 -->
+    <section id="works" class="works">
+        <div class="container">
+            <h2 class="section-title" data-i18n="works.title">포트폴리오</h2>
+            <p class="section-desc" data-i18n="works.subtitle">공간별 조명 디자인 프로젝트</p>
+            
+            <div class="filter-add-row">
+                <div class="filter-btns">
+                    <button class="filter-btn active" data-filter="all" data-i18n="filter.all">전체</button>
+                    <button class="filter-btn" data-filter="residential" data-i18n="filter.residential">경관조명</button>
+                    <button class="filter-btn" data-filter="commercial" data-i18n="filter.commercial">스포츠조명</button>
+                    <button class="filter-btn" data-filter="public" data-i18n="filter.public">공공시설</button>
+                    <button class="filter-btn" data-filter="exhibition" data-i18n="filter.exhibition">전시회</button>
+                </div>
+                <button type="button" class="add-project-btn" id="addProjectBtn">
+                    <span class="add-icon">+</span> <span data-i18n="addProject.btn">프로젝트 추가</span>
+                </button>
+            </div>
+
+            <div class="gallery">
+                <p class="gallery-empty-msg" data-i18n="gallery.empty">프로젝트가 없습니다. '프로젝트 추가' 버튼으로 새 프로젝트를 추가하세요.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- 제품 섹션 -->
+    <section id="products" class="products">
+        <div class="container">
+            <h2 class="section-title" data-i18n="products.title">제품</h2>
+            <p class="section-desc" data-i18n="products.subtitle">조명 제품 카탈로그</p>
+            <div class="products-add-row">
+                <button type="button" class="add-product-btn" id="addProductBtn">
+                    <span class="add-icon">+</span> <span data-i18n="products.addBtn">제품 추가</span>
+                </button>
+            </div>
+            <div class="products-gallery">
+                <p class="products-empty-msg" data-i18n="products.empty">제품이 없습니다. '제품 추가' 버튼으로 새 제품을 등록하세요.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- 회사소개 섹션 -->
+    <section id="about" class="about">
+        <div class="container">
+            <div class="about-header">
+                <p class="about-tagline" data-i18n="about.tagline">빛으로 일상을 업그레이드하는, 탄탄테크(주)</p>
+                <p class="about-subtitle" data-i18n="about.subtitle">단순히 밝히는 것을 넘어, 공간에 감성과 안심을 채웁니다.</p>
+            </div>
+            <p class="about-intro" data-i18n="about.intro">탄탄테크 주식회사는 전문적인 조명 솔루션을 통해 도시의 밤을 아름답게 수놓고, 사람들의 일상을 더욱 안전하게 만드는 조명 전문 기업입니다.</p>
+            
+            <div class="about-section">
+                <h3 class="about-section-title" data-i18n="about.coreTitle">■ 핵심 비즈니스</h3>
+                <div class="about-cards">
+                    <div class="about-card">
+                        <span class="about-card-label" data-i18n="about.landscapeLabel">LED 경관조명</span>
+                        <p class="about-card-desc" data-i18n="about.landscapeDesc">도심의 야경을 화려한 갤러리처럼 연출하여 공간의 가치를 높입니다.</p>
+                    </div>
+                    <div class="about-card">
+                        <span class="about-card-label" data-i18n="about.securityLabel">LED 보안등</span>
+                        <p class="about-card-desc" data-i18n="about.securityDesc">어두운 골목길을 내 집 마당처럼 안심하고 다닐 수 있는 환경으로 바꿉니다.</p>
+                    </div>
+                    <div class="about-card">
+                        <span class="about-card-label" data-i18n="about.sportsLabel">스포츠조명</span>
+                        <p class="about-card-desc" data-i18n="about.sportsDesc">경기장과 운동 시설에 최적화된 조명으로 선수와 관중 모두가 쾌적하게 즐길 수 있는 환경을 만들어드립니다.</p>
+                    </div>
+                    <div class="about-card">
+                        <span class="about-card-label" data-i18n="about.solarLabel">태양광조명</span>
+                        <p class="about-card-desc" data-i18n="about.solarDesc">친환경 태양광 에너지를 활용한 조명으로 에너지 절감과 함께 지속 가능한 조명 환경을 제공합니다.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="about-section">
+                <h3 class="about-section-title" data-i18n="about.diffTitle">■ 탄탄테크 만의 차별점</h3>
+                <p class="about-diff" data-i18n="about.diffText">'원스톱 토털 서비스' - 기획 및 설계부터 생산, 설치 및 지원, 그리고 철저한 사후관리(A/S)까지 모든 과정을 '탄탄'하게 책임집니다. 고객이 믿고 맡길 수 있는 정직한 공정을 약속합니다.</p>
+            </div>
+
+            <div class="about-section">
+                <h3 class="about-section-title" data-i18n="about.valuesTitle">■ 3가지 핵심 가치</h3>
+                <div class="about-values">
+                    <div class="about-value">
+                        <span class="about-value-icon">T</span>
+                        <strong class="about-value-name" data-i18n="about.techName">기술(Technology)</strong>
+                        <p class="about-value-desc" data-i18n="about.techDesc">끊임없는 연구로 혁신적인 조명 기술을 선보입니다.</p>
+                    </div>
+                    <div class="about-value">
+                        <span class="about-value-icon">D</span>
+                        <strong class="about-value-name" data-i18n="about.designName">디자인(Design)</strong>
+                        <p class="about-value-desc" data-i18n="about.designDesc">공간과 조화롭게 어우러지는 최상의 미학을 추구합니다.</p>
+                    </div>
+                    <div class="about-value">
+                        <span class="about-value-icon">S</span>
+                        <strong class="about-value-name" data-i18n="about.safetyName">안전(Safety)</strong>
+                        <p class="about-value-desc" data-i18n="about.safetyDesc">사람의 안전을 최우선으로 생각하는 빛을 만듭니다.</p>
+                    </div>
+                </div>
+            </div>
+
+            <p class="about-closing" data-i18n="about.closing">탄탄테크는 앞으로도 새로운 빛의 경험을 선사하며, 늘 여러분 곁에서 반짝반짝 함께하겠습니다.</p>
+            <div class="about-visual">
+                <div class="glow-orb"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 연락처 섹션 -->
+    <section id="contact" class="contact">
+        <div class="container">
+            <h2 class="section-title" data-i18n="contact.title">프로젝트 문의</h2>
+            <p class="section-desc" data-i18n="contact.subtitle">조명 디자인 프로젝트 협업을 원하시면 연락주세요.</p>
+            <form class="contact-form">
+                <div class="form-row">
+                    <input type="text" data-i18n-placeholder="contact.name" placeholder="이름" required>
+                    <input type="email" data-i18n-placeholder="contact.email" placeholder="이메일" required>
+                </div>
+                <input type="text" data-i18n-placeholder="contact.projectType" placeholder="프로젝트 유형">
+                <textarea data-i18n-placeholder="contact.description" placeholder="프로젝트 설명" rows="5"></textarea>
+                <button type="submit" class="submit-btn" data-i18n="contact.submit">문의 보내기</button>
+            </form>
+        </div>
+    </section>
+
+    <!-- 푸터 -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <span class="logo">TANTANTECH</span>
+                <p>© 2024 TANTANTECH Lighting Design. All rights reserved.</p>
+                <div class="social-links">
+                    <a href="#" aria-label="인스타그램">Instagram</a>
+                    <a href="#" aria-label="링크드인">LinkedIn</a>
+                    <a href="#" aria-label="포트폴리오">Behance</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- 프로젝트 상세 모달 -->
+    <div class="modal" id="projectModal">
+        <div class="modal-overlay"></div>
+        <div class="modal-content">
+            <button class="modal-close" aria-label="닫기">&times;</button>
+            <div class="modal-body">
+                <div class="modal-image">
+                    <div class="placeholder-img" data-i18n="modal.image">프로젝트 이미지</div>
+                </div>
+                <div class="modal-info">
+                    <h3 class="modal-title">프로젝트 제목</h3>
+                    <p class="modal-category">카테고리</p>
+                    <p class="modal-desc" data-i18n="modal.defaultDesc">
+                        프로젝트에 대한 상세한 설명이 여기에 표시됩니다.
+                        조명 설계 컨셉, 사용된 조명 기구, 특별히 고려한 사항 등을 
+                        자세히 설명합니다.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 프로젝트 추가 모달 -->
+    <div class="modal" id="addProjectModal">
+        <div class="modal-overlay"></div>
+        <div class="modal-content modal-add-project">
+            <button class="modal-close add-modal-close" aria-label="닫기">&times;</button>
+            <h3 class="modal-add-title" data-i18n="addProject.title">프로젝트 추가</h3>
+            <form class="add-project-form" id="addProjectForm">
+                <div class="form-group">
+                    <label for="projectImage" data-i18n="addProject.image">이미지</label>
+                    <input type="file" id="projectImage" accept="image/*" hidden>
+                    <div class="image-upload-area" id="imageUploadArea">
+                        <div class="upload-placeholder" id="uploadPlaceholder">
+                            <span class="upload-icon">📷</span>
+                            <span data-i18n="addProject.imageHint">클릭하여 이미지 업로드 (최대 10MB)</span>
+                        </div>
+                        <img class="upload-preview" id="uploadPreview" src="" alt="" style="display:none;">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label data-i18n="addProject.titleKo">제목 (한글)</label>
+                    <input type="text" id="projectTitleKo" required placeholder="예: 강남 아파트 인테리어">
+                </div>
+                <div class="form-group">
+                    <label data-i18n="addProject.titleEn">제목 (영어)</label>
+                    <input type="text" id="projectTitleEn" placeholder="e.g. Gangnam Apartment Interior">
+                </div>
+                <div class="form-group">
+                    <label data-i18n="addProject.category">카테고리</label>
+                    <select id="projectCategory" required>
+                        <option value="residential" data-i18n="filter.residential">경관조명</option>
+                        <option value="commercial" data-i18n="filter.commercial">스포츠조명</option>
+                        <option value="public" data-i18n="filter.public">공공시설</option>
+                        <option value="exhibition" data-i18n="filter.exhibition">전시회</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label data-i18n="addProject.subtitleKo">부제목 (한글)</label>
+                    <input type="text" id="projectSubtitleKo" placeholder="예: 침실 & 거실 조명">
+                </div>
+                <div class="form-group">
+                    <label data-i18n="addProject.subtitleEn">부제목 (영어)</label>
+                    <input type="text" id="projectSubtitleEn" placeholder="e.g. Bedroom & Living Room">
+                </div>
+                <div class="form-group">
+                    <label data-i18n="addProject.descKo">설명 (한글)</label>
+                    <textarea id="projectDescKo" rows="3" placeholder="프로젝트에 대한 상세 설명을 입력하세요"></textarea>
+                </div>
+                <div class="form-group">
+                    <label data-i18n="addProject.descEn">설명 (영어)</label>
+                    <textarea id="projectDescEn" rows="3" placeholder="Enter detailed project description"></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="cancel-btn" id="cancelAddProject" data-i18n="addProject.cancel">취소</button>
+                    <button type="submit" class="submit-add-btn" data-i18n="addProject.submit">추가하기</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 프로젝트 수정 모달 -->
+    <div class="modal" id="editProjectModal">
+        <div class="modal-overlay"></div>
+        <div class="modal-content modal-add-project">
+            <button class="modal-close edit-project-modal-close" aria-label="닫기">&times;</button>
+            <h3 class="modal-add-title" data-i18n="editProject.title">프로젝트 수정</h3>
+            <form class="add-project-form" id="editProjectForm">
+                <input type="hidden" id="editProjectId">
+                <div class="form-group">
+                    <label for="editProjectImageInput" data-i18n="addProject.image">이미지</label>
+                    <input type="file" id="editProjectImageInput" accept="image/*" hidden>
+                    <div class="image-upload-area" id="editProjectImageUploadArea">
+                        <div class="upload-placeholder" id="editProjectUploadPlaceholder">
+                            <span class="upload-icon">📷</span>
+                            <span data-i18n="addProject.imageHint">클릭하여 이미지 업로드 (최대 10MB)</span>
+                        </div>
+                        <img class="upload-preview" id="editProjectUploadPreview" src="" alt="" style="display:none;">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label data-i18n="addProject.titleKo">제목 (한글)</label>
+                    <input type="text" id="editProjectTitleKo" required placeholder="예: 강남 아파트 인테리어">
+                </div>
+                <div class="form-group">
+                    <label data-i18n="addProject.titleEn">제목 (영어)</label>
+                    <input type="text" id="editProjectTitleEn" placeholder="e.g. Gangnam Apartment Interior">
+                </div>
+                <div class="form-group">
+                    <label data-i18n="addProject.category">카테고리</label>
+                    <select id="editProjectCategory" required>
+                        <option value="residential" data-i18n="filter.residential">경관조명</option>
+                        <option value="commercial" data-i18n="filter.commercial">스포츠조명</option>
+                        <option value="public" data-i18n="filter.public">공공시설</option>
+                        <option value="exhibition" data-i18n="filter.exhibition">전시회</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label data-i18n="addProject.subtitleKo">부제목 (한글)</label>
+                    <input type="text" id="editProjectSubtitleKo" placeholder="예: 침실 & 거실 조명">
+                </div>
+                <div class="form-group">
+                    <label data-i18n="addProject.subtitleEn">부제목 (영어)</label>
+                    <input type="text" id="editProjectSubtitleEn" placeholder="e.g. Bedroom & Living Room">
+                </div>
+                <div class="form-group">
+                    <label data-i18n="addProject.descKo">설명 (한글)</label>
+                    <textarea id="editProjectDescKo" rows="3" placeholder="프로젝트에 대한 상세 설명을 입력하세요"></textarea>
+                </div>
+                <div class="form-group">
+                    <label data-i18n="addProject.descEn">설명 (영어)</label>
+                    <textarea id="editProjectDescEn" rows="3" placeholder="Enter detailed project description"></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="cancel-btn" id="cancelEditProject" data-i18n="addProject.cancel">취소</button>
+                    <button type="submit" class="submit-add-btn" data-i18n="editProject.submit">저장</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 제품 추가 모달 -->
+    <div class="modal" id="addProductModal">
+        <div class="modal-overlay"></div>
+        <div class="modal-content modal-add-product">
+            <button class="modal-close product-modal-close" aria-label="닫기">&times;</button>
+            <h3 class="modal-add-title" data-i18n="addProduct.title">제품 추가</h3>
+            <form class="add-product-form" id="addProductForm">
+                <div class="form-group">
+                    <label for="productImageInput" data-i18n="addProduct.image">제품 이미지</label>
+                    <input type="file" id="productImageInput" accept="image/*" hidden>
+                    <div class="image-upload-area" id="productImageUploadArea">
+                        <div class="upload-placeholder" id="productUploadPlaceholder">
+                            <span class="upload-icon">📷</span>
+                            <span data-i18n="addProduct.imageHint">클릭하여 제품 이미지 업로드 (최대 10MB)</span>
+                        </div>
+                        <img class="upload-preview" id="productUploadPreview" src="" alt="" style="display:none;">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label data-i18n="addProduct.nameKo">제품명 (한글)</label>
+                    <input type="text" id="productNameKo" required placeholder="예: LED 경관조명 50W">
+                </div>
+                <div class="form-group">
+                    <label data-i18n="addProduct.nameEn">제품명 (영어)</label>
+                    <input type="text" id="productNameEn" placeholder="e.g. LED Landscape Light 50W">
+                </div>
+                <div class="form-group">
+                    <label data-i18n="addProduct.descKo">설명 (한글)</label>
+                    <textarea id="productDescKo" rows="3" placeholder="제품에 대한 설명을 입력하세요"></textarea>
+                </div>
+                <div class="form-group">
+                    <label data-i18n="addProduct.descEn">설명 (영어)</label>
+                    <textarea id="productDescEn" rows="3" placeholder="Enter product description"></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="cancel-btn" id="cancelAddProduct" data-i18n="addProduct.cancel">취소</button>
+                    <button type="submit" class="submit-add-btn" data-i18n="addProduct.submit">추가하기</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 제품 수정 모달 -->
+    <div class="modal" id="editProductModal">
+        <div class="modal-overlay"></div>
+        <div class="modal-content modal-add-product">
+            <button class="modal-close edit-product-modal-close" aria-label="닫기">&times;</button>
+            <h3 class="modal-add-title" data-i18n="editProduct.title">제품 수정</h3>
+            <form class="add-product-form" id="editProductForm">
+                <input type="hidden" id="editProductId">
+                <div class="form-group">
+                    <label for="editProductImageInput" data-i18n="addProduct.image">제품 이미지</label>
+                    <input type="file" id="editProductImageInput" accept="image/*" hidden>
+                    <div class="image-upload-area" id="editProductImageUploadArea">
+                        <div class="upload-placeholder" id="editProductUploadPlaceholder">
+                            <span class="upload-icon">📷</span>
+                            <span data-i18n="addProduct.imageHint">클릭하여 제품 이미지 업로드 (최대 10MB)</span>
+                        </div>
+                        <img class="upload-preview" id="editProductUploadPreview" src="" alt="" style="display:none;">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label data-i18n="addProduct.nameKo">제품명 (한글)</label>
+                    <input type="text" id="editProductNameKo" required placeholder="예: LED 경관조명 50W">
+                </div>
+                <div class="form-group">
+                    <label data-i18n="addProduct.nameEn">제품명 (영어)</label>
+                    <input type="text" id="editProductNameEn" placeholder="e.g. LED Landscape Light 50W">
+                </div>
+                <div class="form-group">
+                    <label data-i18n="addProduct.descKo">설명 (한글)</label>
+                    <textarea id="editProductDescKo" rows="3" placeholder="제품에 대한 설명을 입력하세요"></textarea>
+                </div>
+                <div class="form-group">
+                    <label data-i18n="addProduct.descEn">설명 (영어)</label>
+                    <textarea id="editProductDescEn" rows="3" placeholder="Enter product description"></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="cancel-btn" id="cancelEditProduct" data-i18n="addProduct.cancel">취소</button>
+                    <button type="submit" class="submit-add-btn" data-i18n="editProduct.submit">저장</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 제품 이미지 원본 보기 모달 -->
+    <div class="modal" id="productImageViewerModal">
+        <div class="modal-overlay product-image-viewer-overlay"></div>
+        <div class="modal-content modal-product-image-viewer">
+            <button class="modal-close product-image-viewer-close" aria-label="닫기">&times;</button>
+            <img class="product-image-viewer-img" id="productImageViewerImg" src="" alt="">
+        </div>
+    </div>
+
+    <!-- 삭제 확인 모달 (프로젝트/제품 공용) -->
+    <div class="modal" id="deleteConfirmModal">
+        <div class="modal-overlay"></div>
+        <div class="modal-content modal-delete">
+            <button class="modal-close delete-modal-close" aria-label="닫기">&times;</button>
+            <h3 class="modal-delete-title" id="deleteModalTitle">프로젝트 삭제</h3>
+            <p class="modal-delete-msg" id="deleteModalMessage">정말 이 프로젝트를 삭제하시겠습니까?</p>
+            <div class="form-group">
+                <label id="deleteModalPasswordLabel" data-i18n="delete.passwordLabel">삭제 비밀번호</label>
+                <input type="password" id="deletePasswordInput" data-i18n-placeholder="delete.passwordPlaceholder" placeholder="비밀번호 입력" autocomplete="off">
+                <p class="delete-error-msg" id="deleteErrorMsg"></p>
+            </div>
+            <div class="form-actions">
+                <button type="button" class="cancel-btn" id="cancelDelete" data-i18n="delete.cancel">취소</button>
+                <button type="button" class="delete-confirm-btn" id="confirmDelete" data-i18n="delete.confirm">삭제</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
