@@ -318,42 +318,6 @@ const contactForm = document.querySelector('.contact-form');
 const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
 const navLinks = document.querySelector('.nav-links');
 
-// ===== 프로젝트 데이터 =====
-const projectData = {
-    ko: {
-        residential: [
-            { title: '강남 아파트 인테리어', desc: '침실과 거실을 위한 따뜻한 분위기의 조명 설계. 간접조명과 매인 조명의 밸런스를 맞춰 일상에서 편안한 휴식 공간을 연출했습니다. 스마트 조명 시스템으로 시간대별 자동 조절이 가능합니다.' },
-            { title: '한남동 단독주택', desc: '야간 정원을 위한 외부 조명 시스템. 수목 조명과 pathway 조명으로 안전하면서도 분위기 있는 야경을 완성했습니다. 태양광 LED를 활용한 친환경 설계입니다.' }
-        ],
-        commercial: [
-            { title: '서울 카페 라운지', desc: '브런치부터 저녁까지 변화하는 분위기에 맞춘 다이내믹 조명 시스템. 펜던트 조명과 테이블 포커스 조명으로 감성적인 카페 분위기를 연출했습니다.' },
-            { title: '명동 리테일 스토어', desc: '상품을 최적의 각도와 밝기로 비추는 전시 조명. CRI 95 이상의 고색재현 LED로 상품의 실제 색상을 정확히 표현하며, 고객의 시선을 자연스럽게 유도합니다.' }
-        ],
-        public: [
-            { title: '시립 미술관 로비', desc: '전시 공간과 맞물리는 로비 조명 설계. 자연광과 인공광의 하모니를 고려하여, 시간대별로 변화하는 빛의 풍경을 구현했습니다. 에너지 효율을 높인 디머 시스템 적용.' }
-        ],
-        exhibition: [
-            { title: '디자인 서울 2024', desc: '메인 전시관을 위한 대규모 조명 연출. 다양한 부스와 전시물에 맞춘 개별 조명 설정으로, 방문객이 각 전시를 최적의 상태로 감상할 수 있도록 설계했습니다.' }
-        ]
-    },
-    en: {
-        residential: [
-            { title: 'Gangnam Apartment Interior', desc: 'Warm lighting design for bedroom and living room. We balanced indirect and main lighting to create a comfortable rest space. Smart lighting system enables automatic adjustment by time of day.' },
-            { title: 'Hannam Single House', desc: 'External lighting system for night garden. Tree and pathway lighting complete a safe yet atmospheric nightscape. Eco-friendly design using solar LED.' }
-        ],
-        commercial: [
-            { title: 'Seoul Cafe Lounge', desc: 'Dynamic lighting system for brunch to evening ambiance. Pendant and table focus lighting create a moody cafe atmosphere.' },
-            { title: 'Myeongdong Retail Store', desc: 'Display lighting at optimal angles and brightness. CRI 95+ high color rendering LED accurately expresses product colors and naturally guides customer attention.' }
-        ],
-        public: [
-            { title: 'City Art Museum Lobby', desc: 'Lobby lighting design integrated with exhibition space. Natural and artificial light harmony creates ever-changing lightscapes. Dimmer system for energy efficiency.' }
-        ],
-        exhibition: [
-            { title: 'Design Seoul 2024', desc: 'Large-scale lighting for main exhibition hall. Individual lighting settings per booth and exhibit let visitors experience each display at its best.' }
-        ]
-    }
-};
-
 // ===== Intersection Observer (for scroll animations) =====
 const animationObserver = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
@@ -366,14 +330,14 @@ const animationObserver = new IntersectionObserver((entries) => {
 
 // ===== Custom Projects (localStorage) =====
 const CUSTOM_PROJECTS_KEY = 'tantantech_custom_projects';
-// const PORTFOLIO_VERSION = '2'; // 포트폴리오 초기화 시 증가
-// (function() {
-//     const stored = localStorage.getItem('tantantech_version');
-//     if (stored !== PORTFOLIO_VERSION) {
-//         localStorage.setItem(CUSTOM_PROJECTS_KEY, '[]');
-//         localStorage.setItem('tantantech_version', PORTFOLIO_VERSION);
-//     }
-// })();
+const RESET_DATA_VERSION = '1';
+(function () {
+    if (localStorage.getItem('tantantech_data_version') !== RESET_DATA_VERSION) {
+        localStorage.setItem(CUSTOM_PROJECTS_KEY, '[]');
+        localStorage.setItem('tantantech_custom_products', '[]');
+        localStorage.setItem('tantantech_data_version', RESET_DATA_VERSION);
+    }
+})();
 
 function getCustomProjects() {
     try {
@@ -1524,18 +1488,12 @@ document.querySelector('.gallery')?.addEventListener('click', (e) => {
             imageUrl = custom.imageData || null;
         }
     } else {
-        title = titleEl?.textContent || '프로젝트';
-        const data = projectData[lang]?.[category];
-        desc = lang === 'ko' 
+        title = titleEl?.textContent || (lang === 'ko' ? '프로젝트' : 'Project');
+        desc = lang === 'ko'
             ? '조명 설계 컨셉, 사용된 조명 기구, 특별히 고려한 사항 등을 자세히 설명합니다.'
             : 'Detailed project description including lighting design concept, fixtures used, and special considerations.';
-        if (data) {
-            const project = data.find(p => p.title === title);
-            if (project) desc = project.desc;
-        }
     }
-    
-    openModal(title || '프로젝트', category, desc || '', imageUrl);
+    openModal(title || (lang === 'ko' ? '프로젝트' : 'Project'), category, desc || '', imageUrl);
 });
 
 modalClose?.addEventListener('click', closeModal);
