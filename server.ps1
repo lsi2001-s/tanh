@@ -1,180 +1,107 @@
-param(
-    [int]$Port = 18080
-)
+<#
+    Simple PowerShell Web Server for TANTANTECH
+    - Serves static files (html, css, js, images)
+    - Handles data persistence to data.json
+    - Run with: .\server.ps1
+#>
 
-$ErrorActionPreference = 'Stop'
-
-$root = Split-Path -Parent $MyInvocation.MyCommand.Path
-$dataDir = Join-Path $root 'data'
-$productsPath = Join-Path $dataDir 'products.json'
-$projectsPath = Join-Path $dataDir 'projects.json'
-
-function Ensure-DataFile([string]$path) {
-    if (-not (Test-Path $dataDir)) { New-Item -ItemType Directory -Path $dataDir | Out-Null }
-    if (-not (Test-Path $path)) { Set-Content -Path $path -Value '[]' -Encoding UTF8 }
-}
-
-function Read-JsonArray([string]$path) {
-    Ensure-DataFile $path
-    $raw = Get-Content -Path $path -Raw -Encoding UTF8
-    if ([string]::IsNullOrWhiteSpace($raw)) { return @() }
-    try {
-        $obj = $raw | ConvertFrom-Json
-        if ($obj -is [System.Array]) { return $obj }
-        return @()
-    } catch {
-        return @()
-    }
-}
-
-function Write-JsonArray([string]$path, $arr) {
-    Ensure-DataFile $path
-    if ($null -eq $arr -or -not ($arr -is [System.Array])) { $arr = @() }
-    $json = ConvertTo-Json -InputObject $arr -Depth 50
-    Set-Content -Path $path -Value $json -Encoding UTF8
-}
-
-function Get-ContentType([string]$filePath) {
-    switch ([IO.Path]::GetExtension($filePath).ToLowerInvariant()) {
-        '.html' { return 'text/html; charset=utf-8' }
-        '.css'  { return 'text/css; charset=utf-8' }
-        '.js'   { return 'application/javascript; charset=utf-8' }
-        '.png'  { return 'image/png' }
-        '.jpg'  { return 'image/jpeg' }
-        '.jpeg' { return 'image/jpeg' }
-        '.webp' { return 'image/webp' }
-        '.svg'  { return 'image/svg+xml; charset=utf-8' }
-        '.json' { return 'application/json; charset=utf-8' }
-        default { return 'application/octet-stream' }
-    }
-}
-
-function Send-Bytes($ctx, [int]$status, [string]$contentType, [byte[]]$bytes) {
-    $res = $ctx.Response
-    $res.StatusCode = $status
-    $res.ContentType = $contentType
-    $res.AddHeader('Cache-Control', 'no-store')
-    $res.ContentLength64 = $bytes.Length
-    $res.OutputStream.Write($bytes, 0, $bytes.Length)
-    $res.OutputStream.Close()
-}
-
-function Send-Text($ctx, [int]$status, [string]$contentType, [string]$text) {
-    $bytes = [Text.Encoding]::UTF8.GetBytes($text)
-    Send-Bytes $ctx $status $contentType $bytes
-}
-
-function Send-Json($ctx, [int]$status, $obj) {
-    $json = ConvertTo-Json -InputObject $obj -Depth 50
-    Send-Text $ctx $status 'application/json; charset=utf-8' $json
-}
-
-function Read-BodyText($ctx) {
-    $req = $ctx.Request
-    $reader = New-Object IO.StreamReader($req.InputStream, $req.ContentEncoding)
-    try { return $reader.ReadToEnd() } finally { $reader.Close() }
-}
+$port = 8000
+$root = Get-Location
+$dataFile = Join-Path $root "data.json"
 
 $listener = New-Object System.Net.HttpListener
-$port = [int]$Port
-while ($true) {
+$listener.Prefixes.Add("http://localhost:$port/")
+$listener.Start()
+
+Write-Host "Server running at http://localhost:$port/"
+Write-Host "Press Ctrl+C to stop."
+
+while ($listener.IsListening) {
+    $context = $listener.GetContext()
+    $request = $context.Request
+    $response = $context.Response
+    
+    $path = $request.Url.LocalPath
+    $method = $request.HttpMethod
+    
+    # CORS Headers
+    $response.AddHeader("Access-Control-Allow-Origin", "*")
+    $response.AddHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+    $response.AddHeader("Access-Control-Allow-Headers", "Content-Type")
+    
+    if ($method -eq "OPTIONS") {
+        $response.Close()
+        continue
+    }
+
     try {
-        $listener.Prefixes.Clear()
-        $prefix = "http://127.0.0.1:$port/"
-        $listener.Prefixes.Add($prefix)
-        $listener.Start()
-        break
-    } catch [System.Net.HttpListenerException] {
-        $port += 1
-        if ($port -gt ($Port + 50)) { throw }
-    }
-}
-
-Write-Host "Server running: http://localhost:$port"
-Write-Host "브라우저에서 위 주소(HTTP)로 열어야 다른 브라우저와 제품/프로젝트가 공유됩니다."
-
-try {
-    while ($listener.IsListening) {
-        $ctx = $listener.GetContext()
-        $req = $ctx.Request
-        $path = $req.Url.AbsolutePath
-
-        if ($path -like '/api/*') {
-            try {
-                if ($path -eq '/api/products') {
-                    if ($req.HttpMethod -eq 'GET') {
-                        Send-Json $ctx 200 (Read-JsonArray $productsPath)
-                        continue
-                    }
-                    if ($req.HttpMethod -eq 'PUT') {
-                        $body = Read-BodyText $ctx
-                        $parsed = @()
-                        try { $parsed = $body | ConvertFrom-Json } catch { $parsed = $null }
-                        if ($null -eq $parsed) {
-                            Send-Json $ctx 400 @{ error = 'Invalid JSON body' }
-                            continue
-                        }
-                        if (-not ($parsed -is [System.Array])) { $parsed = @($parsed) }
-                        Write-JsonArray $productsPath $parsed
-                        Send-Json $ctx 200 @{ ok = $true }
-                        continue
-                    }
-                    Send-Json $ctx 405 @{ error = 'Method not allowed' }
-                    continue
+        # API Endpoint: /api/data
+        if ($path -eq "/api/data") {
+            if ($method -eq "GET") {
+                if (Test-Path $dataFile) {
+                    $json = Get-Content $dataFile -Raw -Encoding UTF8
+                    $buffer = [System.Text.Encoding]::UTF8.GetBytes($json)
+                    $response.ContentType = "application/json"
+                    $response.ContentLength64 = $buffer.Length
+                    $response.OutputStream.Write($buffer, 0, $buffer.Length)
+                } else {
+                    $empty = '{"projects":[], "products":[]}'
+                    $buffer = [System.Text.Encoding]::UTF8.GetBytes($empty)
+                    $response.ContentType = "application/json"
+                    $response.OutputStream.Write($buffer, 0, $buffer.Length)
                 }
-
-                if ($path -eq '/api/projects') {
-                    if ($req.HttpMethod -eq 'GET') {
-                        Send-Json $ctx 200 (Read-JsonArray $projectsPath)
-                        continue
-                    }
-                    if ($req.HttpMethod -eq 'PUT') {
-                        $body = Read-BodyText $ctx
-                        $parsed = @()
-                        try { $parsed = $body | ConvertFrom-Json } catch { $parsed = $null }
-                        if ($null -eq $parsed) {
-                            Send-Json $ctx 400 @{ error = 'Invalid JSON body' }
-                            continue
-                        }
-                        if (-not ($parsed -is [System.Array])) { $parsed = @($parsed) }
-                        Write-JsonArray $projectsPath $parsed
-                        Send-Json $ctx 200 @{ ok = $true }
-                        continue
-                    }
-                    Send-Json $ctx 405 @{ error = 'Method not allowed' }
-                    continue
-                }
-
-                Send-Json $ctx 404 @{ error = 'Not found' }
-            } catch {
-                Send-Json $ctx 500 @{ error = 'Server error'; detail = $_.Exception.Message }
             }
-            continue
+            elseif ($method -eq "POST") {
+                $reader = New-Object System.IO.StreamReader($request.InputStream, $request.ContentEncoding)
+                $body = $reader.ReadToEnd()
+                $reader.Close()
+                
+                # Validate JSON (simple check)
+                try {
+                    $null = ConvertFrom-Json $body
+                    $body | Out-File $dataFile -Encoding UTF8
+                    
+                    $msg = '{"success": true}'
+                    $buffer = [System.Text.Encoding]::UTF8.GetBytes($msg)
+                    $response.ContentType = "application/json"
+                    $response.OutputStream.Write($buffer, 0, $buffer.Length)
+                } catch {
+                    $response.StatusCode = 400
+                }
+            }
         }
-
-        # Static files
-        $relative = [Uri]::UnescapeDataString($path)
-        if ($relative -eq '/' -or [string]::IsNullOrWhiteSpace($relative)) { $relative = '/index.html' }
-        $relative = $relative.TrimStart('/')
-        $filePath = Join-Path $root $relative
-        $full = [IO.Path]::GetFullPath($filePath)
-        $rootFull = [IO.Path]::GetFullPath($root)
-
-        if (-not $full.StartsWith($rootFull, [StringComparison]::OrdinalIgnoreCase)) {
-            Send-Text $ctx 400 'text/plain; charset=utf-8' 'Bad Request'
-            continue
+        else {
+            # Static File Serving
+            if ($path -eq "/") { $path = "/index.html" }
+            $localPath = Join-Path $root $path.TrimStart('/')
+            
+            if (Test-Path $localPath -PathType Leaf) {
+                $content = [System.IO.File]::ReadAllBytes($localPath)
+                $extension = [System.IO.Path]::GetExtension($localPath)
+                
+                switch ($extension) {
+                    ".html" { $response.ContentType = "text/html; charset=utf-8" }
+                    ".css"  { $response.ContentType = "text/css" }
+                    ".js"   { $response.ContentType = "application/javascript" }
+                    ".json" { $response.ContentType = "application/json" }
+                    ".png"  { $response.ContentType = "image/png" }
+                    ".jpg"  { $response.ContentType = "image/jpeg" }
+                    ".jpeg" { $response.ContentType = "image/jpeg" }
+                    default { $response.ContentType = "application/octet-stream" }
+                }
+                
+                $response.ContentLength64 = $content.Length
+                $response.OutputStream.Write($content, 0, $content.Length)
+            } else {
+                $response.StatusCode = 404
+            }
         }
-
-        if (-not (Test-Path $full -PathType Leaf)) {
-            Send-Text $ctx 404 'text/plain; charset=utf-8' 'Not Found'
-            continue
-        }
-
-        $bytes = [IO.File]::ReadAllBytes($full)
-        Send-Bytes $ctx 200 (Get-ContentType $full) $bytes
     }
-} finally {
-    $listener.Stop()
-    $listener.Close()
+    catch {
+        $response.StatusCode = 500
+        Write-Host "Error: $_"
+    }
+    finally {
+        $response.Close()
+    }
 }
-

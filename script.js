@@ -328,29 +328,88 @@ const animationObserver = new IntersectionObserver((entries) => {
     });
 }, { threshold: 0.1, rootMargin: '0px 0px -50px 0px' });
 
-// ===== Custom Projects (localStorage) =====
-const CUSTOM_PROJECTS_KEY = 'tantantech_custom_projects';
-const RESET_DATA_VERSION = '1';
-(function () {
-    if (localStorage.getItem('tantantech_data_version') !== RESET_DATA_VERSION) {
-        localStorage.setItem(CUSTOM_PROJECTS_KEY, '[]');
-        localStorage.setItem('tantantech_custom_products', '[]');
-        localStorage.setItem('tantantech_data_version', RESET_DATA_VERSION);
+// ===== Data Management (File System via server.ps1) =====
+let g_projects = [];
+let g_products = [];
+const API_URL = 'http://localhost:8000/api/data';
+
+// 데이터 불러오기 (서버 -> 메모리)
+async function loadData() {
+    try {
+        const res = await fetch(API_URL);
+        if (res.ok) {
+            const data = await res.json();
+            g_projects = Array.isArray(data.projects) ? data.projects : [];
+            g_products = Array.isArray(data.products) ? data.products : [];
+            renderCustomProjects();
+            renderCustomProducts();
+        }
+    } catch (e) {
+        console.log('서버에 연결할 수 없습니다. localStorage를 사용하거나 server.ps1을 실행하세요.');
+        // Fallback: localStorage
+        loadFromLocal();
     }
-})();
+}
+
+// 데이터 저장하기 (메모리 -> 서버)
+async function saveData() {
+    const data = {
+        projects: g_projects,
+        products: g_products
+    };
+    
+    // 1. 서버에 저장 시도
+    try {
+        await fetch(API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
+    } catch (e) {
+        console.warn('서버 저장 실패 (server.ps1 미실행?)');
+    }
+    
+    // 2. localStorage에도 백업
+    saveToLocal();
+}
+
+function loadFromLocal() {
+    try {
+        g_projects = JSON.parse(localStorage.getItem('tantantech_projects') || '[]');
+        g_products = JSON.parse(localStorage.getItem('tantantech_products') || '[]');
+    } catch {
+        g_projects = [];
+        g_products = [];
+    }
+    renderCustomProjects();
+    renderCustomProducts();
+}
+
+function saveToLocal() {
+    localStorage.setItem('tantantech_projects', JSON.stringify(g_projects));
+    localStorage.setItem('tantantech_products', JSON.stringify(g_products));
+}
 
 function getCustomProjects() {
-    try {
-        const data = localStorage.getItem(CUSTOM_PROJECTS_KEY);
-        return data ? JSON.parse(data) : [];
-    } catch (e) {
-        return [];
-    }
+    return g_projects;
 }
 
 function saveCustomProjects(projects) {
-    localStorage.setItem(CUSTOM_PROJECTS_KEY, JSON.stringify(projects));
+    g_projects = projects;
+    saveData();
 }
+
+function getCustomProducts() {
+    return g_products;
+}
+
+function saveCustomProducts(products) {
+    g_products = products;
+    saveData();
+}
+
+// 초기화: 데이터 로드
+loadData();
 
 function renderCustomProjects() {
     const gallery = document.querySelector('.gallery');
@@ -488,21 +547,7 @@ function initLanguage() {
     setLanguage(savedLang);
 }
 
-// ===== Custom Products (localStorage) =====
-const CUSTOM_PRODUCTS_KEY = 'tantantech_custom_products';
-
-function getCustomProducts() {
-    try {
-        const data = localStorage.getItem(CUSTOM_PRODUCTS_KEY);
-        return data ? JSON.parse(data) : [];
-    } catch (e) {
-        return [];
-    }
-}
-
-function saveCustomProducts(products) {
-    localStorage.setItem(CUSTOM_PRODUCTS_KEY, JSON.stringify(products));
-}
+// 기존 localStorage 관련 코드 제거 (위에서 대체됨)
 
 function getProductCategoryLabel(category, lang) {
     return translations[lang]?.productCategory?.[category]
@@ -608,9 +653,7 @@ document.querySelectorAll('.lang-btn').forEach(btn => {
     });
 });
 
-initLanguage();
-renderCustomProjects();
-renderCustomProducts();
+// 초기화 호출 (중복 제거)
 
 // ===== Add Project Modal =====
 const addProjectModal = document.getElementById('addProjectModal');
