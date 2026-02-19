@@ -19,7 +19,13 @@ const translations = {
             title: '제품',
             subtitle: '조명 제품 카탈로그',
             addBtn: '제품 추가',
-            empty: "제품이 없습니다. '제품 추가' 버튼으로 새 제품을 등록하세요."
+            empty: "제품이 없습니다. '제품 추가' 버튼으로 새 제품을 등록하세요.",
+            exportBtn: '백업 내보내기',
+            importBtn: '백업 불러오기',
+            exportSuccess: '제품 백업 파일이 저장되었습니다.',
+            importSuccess: '제품 백업을 불러왔습니다.',
+            importInvalid: '올바른 백업 파일이 아닙니다.',
+            importFail: '백업 불러오기에 실패했습니다.'
         },
         editProject: {
             title: '프로젝트 수정',
@@ -161,7 +167,13 @@ const translations = {
             title: 'Products',
             subtitle: 'Lighting product catalog',
             addBtn: 'Add Product',
-            empty: "No products yet. Add a new product using the 'Add Product' button."
+            empty: "No products yet. Add a new product using the 'Add Product' button.",
+            exportBtn: 'Export Backup',
+            importBtn: 'Import Backup',
+            exportSuccess: 'Product backup file has been downloaded.',
+            importSuccess: 'Product backup imported successfully.',
+            importInvalid: 'Invalid backup file.',
+            importFail: 'Failed to import backup.'
         },
         editProject: {
             title: 'Edit Project',
@@ -358,6 +370,61 @@ const CUSTOM_PROJECTS_KEY = 'tantantech_custom_projects';
 //     }
 // })();
 
+// ===== Shared storage sync (optional local server) =====
+// localStorage는 브라우저/프로필별로 분리됩니다.
+// 동일 PC의 다른 브라우저에서도 동일 데이터가 보이게 하려면 로컬 서버(JSON 저장)를 통해 동기화합니다.
+const SHARED_STORE = {
+    enabled: () => location.protocol === 'http:' || location.protocol === 'https:',
+    timeoutMs: 1500
+};
+
+async function fetchWithTimeout(resource, options = {}) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), SHARED_STORE.timeoutMs);
+    try {
+        return await fetch(resource, { cache: 'no-store', ...options, signal: controller.signal });
+    } finally {
+        clearTimeout(timer);
+    }
+}
+
+async function syncArrayFromServerToLocalStorage(storageKey, apiPath) {
+    if (!SHARED_STORE.enabled()) return false;
+    let localArr = [];
+    try {
+        const raw = localStorage.getItem(storageKey);
+        const parsed = raw ? JSON.parse(raw) : [];
+        localArr = Array.isArray(parsed) ? parsed : [];
+    } catch {
+        localArr = [];
+    }
+    try {
+        const res = await fetchWithTimeout(apiPath, { method: 'GET' });
+        if (!res.ok) return false;
+        const data = await res.json();
+        if (!Array.isArray(data)) return false;
+        if (data.length > 0) {
+            // 서버 데이터가 있으면 서버를 기준으로 로컬을 갱신
+            localStorage.setItem(storageKey, JSON.stringify(data));
+        } else if (localArr.length > 0) {
+            // 서버가 비어있고 로컬에 데이터가 있으면 서버에 시드
+            pushArrayToServer(apiPath, localArr);
+        }
+        return true;
+    } catch {
+        return false;
+    }
+}
+
+function pushArrayToServer(apiPath, data) {
+    if (!SHARED_STORE.enabled()) return;
+    fetchWithTimeout(apiPath, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(Array.isArray(data) ? data : [])
+    }).catch(() => {});
+}
+
 function getCustomProjects() {
     try {
         const data = localStorage.getItem(CUSTOM_PROJECTS_KEY);
@@ -369,6 +436,7 @@ function getCustomProjects() {
 
 function saveCustomProjects(projects) {
     localStorage.setItem(CUSTOM_PROJECTS_KEY, JSON.stringify(projects));
+    pushArrayToServer('/api/projects', projects);
 }
 
 function renderCustomProjects() {
@@ -501,17 +569,6 @@ function initLanguage() {
     setLanguage(savedLang);
 }
 
-document.querySelectorAll('.lang-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-        setLanguage(btn.dataset.lang);
-        renderCustomProjects();
-        renderCustomProducts();
-    });
-});
-initLanguage();
-renderCustomProjects();
-renderCustomProducts();
-
 // ===== Custom Products (localStorage) =====
 const CUSTOM_PRODUCTS_KEY = 'tantantech_custom_products';
 
@@ -526,6 +583,7 @@ function getCustomProducts() {
 
 function saveCustomProducts(products) {
     localStorage.setItem(CUSTOM_PRODUCTS_KEY, JSON.stringify(products));
+    pushArrayToServer('/api/products', products);
 }
 
 function renderCustomProducts() {
@@ -569,6 +627,140 @@ function renderCustomProducts() {
         emptyMsg.style.display = products.length > 0 ? 'none' : 'block';
     }
 }
+
+function normalizeImportedProduct(item) {
+    if (!item || typeof item !== 'object') return null;
+    const nameKo = typeof item.nameKo === 'string' ? item.nameKo.trim() : '';
+    if (!nameKo) return null;
+    return {
+        id: typeof item.id === 'string' && item.id
+            ? item.id
+            : `product_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+        nameKo,
+        nameEn: (typeof item.nameEn === 'string' && item.nameEn.trim())
+            ? item.nameEn.trim()
+            : nameKo,
+        descKo: typeof item.descKo === 'string' ? item.descKo : '',
+        descEn: typeof item.descEn === 'string'
+            ? item.descEn
+            : (typeof item.descKo === 'string' ? item.descKo : ''),
+        imageData: (typeof item.imageData === 'string' && item.imageData.startsWith('data:image'))
+            ? item.imageData
+            : null
+    };
+}
+
+function exportProductsBackup() {
+    const lang = document.documentElement.getAttribute('data-lang') || 'ko';
+    const t = translations[lang]?.products || {};
+    const payload = {
+        app: 'TANTANTECH',
+        type: 'products-backup',
+        version: 1,
+        exportedAt: new Date().toISOString(),
+        products: getCustomProducts()
+    };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const stamp = new Date().toISOString().replace(/[:.]/g, '-');
+    a.href = url;
+    a.download = `tantantech-products-backup-${stamp}.json`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+    alert(t.exportSuccess || '제품 백업 파일이 저장되었습니다.');
+}
+
+async function importProductsBackup(file) {
+    const lang = document.documentElement.getAttribute('data-lang') || 'ko';
+    const t = translations[lang]?.products || {};
+    try {
+        const text = await file.text();
+        const parsed = JSON.parse(text);
+        const rawProducts = Array.isArray(parsed)
+            ? parsed
+            : (Array.isArray(parsed?.products) ? parsed.products : null);
+        if (!rawProducts) {
+            alert(t.importInvalid || '올바른 백업 파일이 아닙니다.');
+            return;
+        }
+        const normalized = rawProducts
+            .map(normalizeImportedProduct)
+            .filter(Boolean);
+        saveCustomProducts(normalized);
+        renderCustomProducts();
+        alert(t.importSuccess || '제품 백업을 불러왔습니다.');
+    } catch (err) {
+        console.error('제품 백업 불러오기 실패:', err);
+        alert(t.importFail || '백업 불러오기에 실패했습니다.');
+    }
+}
+
+// ===== Initial render + optional shared sync =====
+function showSharedStorageHintIfNeeded() {
+    // localStorage는 브라우저별로 달라서, file:// 로 열면 다른 브라우저에서 제품이 안 보이는 것이 정상입니다.
+    if (location.protocol !== 'file:') return;
+    if (sessionStorage.getItem('tantantech_shared_hint_dismissed') === '1') return;
+
+    const bar = document.createElement('div');
+    bar.style.cssText = [
+        'position:fixed',
+        'left:16px',
+        'right:16px',
+        'bottom:16px',
+        'z-index:9999',
+        'padding:12px 14px',
+        'border-radius:12px',
+        'background:rgba(20,20,20,0.92)',
+        'color:#fff',
+        'box-shadow:0 12px 30px rgba(0,0,0,0.35)',
+        'font-family:system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif',
+        'display:flex',
+        'gap:12px',
+        'align-items:flex-start'
+    ].join(';');
+
+    bar.innerHTML = `
+        <div style="flex:1; min-width:0;">
+            <div style="font-weight:700; margin-bottom:4px;">다른 브라우저에서 제품이 안 보이나요?</div>
+            <div style="opacity:0.92; line-height:1.35;">
+                이 페이지를 <b>file://</b>로 열면 제품/프로젝트가 브라우저별로 따로 저장됩니다.<br/>
+                <b>PowerShell</b>에서 <code style="background:rgba(255,255,255,0.12); padding:1px 6px; border-radius:8px;">server.ps1</code> 실행 후
+                터미널에 표시되는 <b>http://localhost:포트</b> 주소로 접속하면 브라우저가 달라도 동일하게 보입니다.
+            </div>
+        </div>
+        <button type="button" style="flex:0 0 auto; border:0; background:rgba(255,255,255,0.14); color:#fff; padding:8px 10px; border-radius:10px; cursor:pointer;">닫기</button>
+    `;
+
+    const btn = bar.querySelector('button');
+    btn?.addEventListener('click', () => {
+        sessionStorage.setItem('tantantech_shared_hint_dismissed', '1');
+        bar.remove();
+    });
+    document.body.appendChild(bar);
+}
+
+document.querySelectorAll('.lang-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        setLanguage(btn.dataset.lang);
+        renderCustomProjects();
+        renderCustomProducts();
+    });
+});
+
+initLanguage();
+showSharedStorageHintIfNeeded();
+
+(async () => {
+    await Promise.all([
+        syncArrayFromServerToLocalStorage(CUSTOM_PROJECTS_KEY, '/api/projects'),
+        syncArrayFromServerToLocalStorage(CUSTOM_PRODUCTS_KEY, '/api/products')
+    ]);
+    renderCustomProjects();
+    renderCustomProducts();
+})();
 
 // ===== Add Project Modal =====
 const addProjectModal = document.getElementById('addProjectModal');
@@ -901,6 +1093,9 @@ const productImageInput = document.getElementById('productImageInput');
 const productImageUploadArea = document.getElementById('productImageUploadArea');
 const productUploadPlaceholder = document.getElementById('productUploadPlaceholder');
 const productUploadPreview = document.getElementById('productUploadPreview');
+const exportProductsBtn = document.getElementById('exportProductsBtn');
+const importProductsBtn = document.getElementById('importProductsBtn');
+const importProductsInput = document.getElementById('importProductsInput');
 
 function openAddProductModal() {
     addProductForm?.reset();
@@ -923,6 +1118,14 @@ addProductBtn?.addEventListener('click', (e) => {
     e.preventDefault();
     e.stopPropagation();
     openAddProductModal();
+});
+exportProductsBtn?.addEventListener('click', exportProductsBackup);
+importProductsBtn?.addEventListener('click', () => importProductsInput?.click());
+importProductsInput?.addEventListener('change', async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    await importProductsBackup(file);
+    e.target.value = '';
 });
 document.querySelector('.product-modal-close')?.addEventListener('click', closeAddProductModal);
 addProductModal?.querySelector('.modal-overlay')?.addEventListener('click', closeAddProductModal);
