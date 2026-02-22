@@ -375,11 +375,30 @@ async function saveData() {
 
 function loadFromLocal() {
     try {
-        g_projects = JSON.parse(localStorage.getItem('tantantech_projects') || '[]');
-        g_products = JSON.parse(localStorage.getItem('tantantech_products') || '[]');
+        const localProjects = localStorage.getItem('tantantech_projects');
+        const localProducts = localStorage.getItem('tantantech_products');
+
+        if (localProjects) {
+            g_projects = JSON.parse(localProjects);
+        }
+        
+        // 데이터가 없으면 기본 데이터 로드
+        if (!g_projects || g_projects.length === 0) {
+            g_projects = getDefaultProjects();
+        }
+
+        if (localProducts) {
+            g_products = JSON.parse(localProducts);
+        }
+        
+        // 데이터가 없으면 기본 데이터 로드
+        if (!g_products || g_products.length === 0) {
+            g_products = getDefaultProducts();
+        }
+
     } catch {
-        g_projects = [];
-        g_products = [];
+        g_projects = getDefaultProjects();
+        g_products = getDefaultProducts();
     }
     renderCustomProjects();
     renderCustomProducts();
@@ -1743,3 +1762,86 @@ importFileInput?.addEventListener('change', (e) => {
         e.target.value = ''; // Reset input
     }
 });
+
+// ===== Default Data (Sample) =====
+function getDefaultProjects() {
+    return [
+        {
+            id: 'sample_1',
+            titleKo: '강남 아파트 인테리어',
+            titleEn: 'Gangnam Apartment Interior',
+            subtitleKo: '침실 & 거실 조명',
+            subtitleEn: 'Bedroom & Living Room',
+            category: 'residential',
+            descKo: '모던하고 아늑한 분위기를 연출하는 주거 공간 조명 디자인입니다.',
+            descEn: 'Residential lighting design creating a modern and cozy atmosphere.',
+            imageData: null
+        },
+        {
+            id: 'sample_2',
+            titleKo: '시립 미술관 로비',
+            titleEn: 'City Art Museum Lobby',
+            subtitleKo: '전시 조명 시스템',
+            subtitleEn: 'Exhibition Lighting System',
+            category: 'public',
+            descKo: '관람객의 동선을 고려한 최적의 조도 설계.',
+            descEn: 'Optimal illuminance design considering visitor flow.',
+            imageData: null
+        },
+        {
+            id: 'sample_3',
+            titleKo: '서울 카페 라운지',
+            titleEn: 'Seoul Cafe Lounge',
+            subtitleKo: '분위기 조명 설계',
+            subtitleEn: 'Ambient Lighting Design',
+            category: 'commercial',
+            descKo: '감성적인 분위기를 자아내는 카페 조명입니다.',
+            descEn: 'Cafe lighting that creates an emotional atmosphere.',
+            imageData: null
+        },
+        {
+            id: 'sample_4',
+            titleKo: '한남동 단독주택',
+            titleEn: 'Hannam Single House',
+            subtitleKo: '야간 정원 조명',
+            subtitleEn: 'Night Garden Lighting',
+            category: 'residential',
+            descKo: '정원의 조경을 돋보이게 하는 야간 조명 설계입니다.',
+            descEn: 'Night lighting design that highlights the garden landscape.',
+            imageData: null
+        }
+    ];
+}
+
+function getDefaultProducts() {
+    return [
+        {
+            id: 'prod_1',
+            nameKo: 'LED 경관조명 50W',
+            nameEn: 'LED Landscape Light 50W',
+            category: 'landscape',
+            descKo: '고효율 LED 칩을 사용한 방수 경관 조명입니다.',
+            descEn: 'Waterproof landscape lighting using high-efficiency LED chips.',
+            imageData: null
+        },
+        {
+            id: 'prod_2',
+            nameKo: '태양광 가로등',
+            nameEn: 'Solar Street Light',
+            category: 'solar',
+            descKo: '별도의 전원 연결이 필요 없는 친환경 가로등.',
+            descEn: 'Eco-friendly street light requiring no external power connection.',
+            imageData: null
+        },
+        {
+            id: 'prod_3',
+            nameKo: '고성능 투광기',
+            nameEn: 'High Performance Floodlight',
+            category: 'floodlight',
+            descKo: '넓은 영역을 밝게 비추는 고성능 투광기입니다.',
+            descEn: 'High-performance floodlight that illuminates wide areas.',
+            imageData: null
+        }
+    ];
+}
+
